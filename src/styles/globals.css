@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+@config "../../tailwind.config.js";
+
+/* Root color variables for theme switching */
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+/* Ensure smooth transitions for theme changes */
+html {
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+/* Custom scrollbar styling for both themes */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: theme('colors.gray.100');
+}
+
+::-webkit-scrollbar-thumb {
+  background: theme('colors.gray.300');
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: theme('colors.gray.400');
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: theme('colors.gray.800');
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: theme('colors.gray.600');
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: theme('colors.gray.500');
+}
+
+@layer utilities {
+  .auth-w-clamp {
+    width: clamp(280px, 95vw, 400px);
+  }
+
+  /* Muted text color for light and dark themes */
+  .text-muted {
+    color: #6b7280; /* gray-500 for light */
+  }
+  .dark .text-muted {
+    color: #a1a1aa; /* gray-400 for dark */
+  }
+
+  /* Muted foreground text color for light and dark themes */
+  .text-muted-foreground {
+    color: #9ca3af; /* gray-400 for light */
+  }
+  .dark .text-muted-foreground {
+    color: #71717a; /* gray-500 for dark */
+  }
+}
