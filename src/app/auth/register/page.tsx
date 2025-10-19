@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { Input, Button } from '@heroui/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useForm } from 'react-hook-form';
@@ -18,7 +18,7 @@ const passwordSchema = z.object({
         .min(8, 'Password must be at least 8 characters')
         .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
         .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-        .regex(/[0-9]/, 'Password must contain at least one number'),
+        .regex(/\d/, 'Password must contain at least one number'),
     confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
@@ -57,18 +57,8 @@ const RegisterPage: React.FC = React.memo(() => {
     const handlePasswordSubmit = async (data: PasswordFormData) => {
         setFormData(prev => ({ ...prev, password: data.password }));
 
-        // API call placeholder
+        // API call will be implemented here
         try {
-            // const response = await fetch('/api/register', {
-            //     method: 'POST',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify({
-            //         email: formData.email,
-            //         password: data.password,
-            //         captchaToken,
-            //     }),
-            // });
-
             setDirection('forward');
             setCurrentPage(3);
         } catch (error) {
@@ -97,13 +87,13 @@ const RegisterPage: React.FC = React.memo(() => {
     };
 
     return (
-        <div className="w-full min-h-[400px] flex flex-col">
+        <div className="w-full flex flex-col">
             <div className="mb-6">
                 <h1 className="text-2xl font-bold text-gray-800">Create Account</h1>
                 <p className="text-sm text-gray-600 mt-1">Step {currentPage} of 3</p>
             </div>
 
-            <div className="flex-1 relative overflow-hidden">
+            <div className="relative overflow-hidden">
                 <AnimatePresence mode="wait" custom={direction} initial={false}>
                     {currentPage === 1 && (
                         <motion.div
@@ -114,13 +104,13 @@ const RegisterPage: React.FC = React.memo(() => {
                             animate="center"
                             exit="exit"
                             transition={{ duration: 0.3, ease: 'easeInOut' }}
-                            className="absolute inset-0 flex flex-col"
+                            className="flex flex-col"
                         >
                             <form
                                 onSubmit={emailForm.handleSubmit(handleEmailSubmit)}
-                                className="flex flex-col h-full"
+                                className="flex flex-col space-y-6"
                             >
-                                <div className="flex-1 space-y-4">
+                                <div className="space-y-4">
                                     <Input
                                         {...emailForm.register('email')}
                                         type="email"
@@ -138,7 +128,7 @@ const RegisterPage: React.FC = React.memo(() => {
                                     </div>
                                 </div>
 
-                                <div className="pt-6">
+                                <div>
                                     <Button
                                         type="submit"
                                         color="primary"
@@ -162,13 +152,13 @@ const RegisterPage: React.FC = React.memo(() => {
                             animate="center"
                             exit="exit"
                             transition={{ duration: 0.3, ease: 'easeInOut' }}
-                            className="absolute inset-0 flex flex-col"
+                            className="flex flex-col"
                         >
                             <form
                                 onSubmit={passwordForm.handleSubmit(handlePasswordSubmit)}
-                                className="flex flex-col h-full"
+                                className="flex flex-col space-y-6"
                             >
-                                <div className="flex-1 space-y-4">
+                                <div className="space-y-4">
                                     <Input
                                         {...passwordForm.register('password')}
                                         type="password"
@@ -194,7 +184,7 @@ const RegisterPage: React.FC = React.memo(() => {
                                     />
                                 </div>
 
-                                <div className="pt-6 space-y-3">
+                                <div className="space-y-3">
                                     <Button
                                         type="submit"
                                         color="primary"
@@ -227,9 +217,9 @@ const RegisterPage: React.FC = React.memo(() => {
                             animate="center"
                             exit="exit"
                             transition={{ duration: 0.3, ease: 'easeInOut' }}
-                            className="absolute inset-0 flex flex-col"
+                            className="flex flex-col"
                         >
-                            <div className="flex-1 flex items-center justify-center">
+                            <div className="flex items-center justify-center py-8">
                                 <div className="text-center">
                                     <h2 className="text-xl font-semibold text-gray-800 mb-2">
                                         Verify Your Email
@@ -240,7 +230,7 @@ const RegisterPage: React.FC = React.memo(() => {
                                 </div>
                             </div>
 
-                            <div className="pt-6 space-y-3">
+                            <div className="space-y-3">
                                 <Button
                                     type="button"
                                     color="primary"
