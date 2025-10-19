@@ -3,7 +3,6 @@
 import React, { useState, useRef } from 'react';
 import { Input, Button } from '@heroui/react';
 import { motion, AnimatePresence } from 'framer-motion';
-import ReCAPTCHA from 'react-google-recaptcha';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -32,13 +31,10 @@ type PasswordFormData = z.infer<typeof passwordSchema>;
 const RegisterPage: React.FC = React.memo(() => {
     const [currentPage, setCurrentPage] = useState<1 | 2 | 3>(1);
     const [direction, setDirection] = useState<'forward' | 'backward'>('forward');
-    const [captchaToken, setCaptchaToken] = useState<string | null>(null);
     const [formData, setFormData] = useState({
         email: '',
         password: '',
     });
-
-    const recaptchaRef = useRef<ReCAPTCHA>(null);
 
     // Email form
     const emailForm = useForm<EmailFormData>({
@@ -53,10 +49,6 @@ const RegisterPage: React.FC = React.memo(() => {
     });
 
     const handleEmailSubmit = (data: EmailFormData) => {
-        if (!captchaToken) {
-            alert('Please complete the captcha');
-            return;
-        }
         setFormData(prev => ({ ...prev, email: data.email }));
         setDirection('forward');
         setCurrentPage(2);
@@ -105,7 +97,7 @@ const RegisterPage: React.FC = React.memo(() => {
     };
 
     return (
-        <div className="w-full h-full min-h-[500px] flex flex-col">
+        <div className="w-full min-h-[400px] flex flex-col">
             <div className="mb-6">
                 <h1 className="text-2xl font-bold text-gray-800">Create Account</h1>
                 <p className="text-sm text-gray-600 mt-1">Step {currentPage} of 3</p>
@@ -142,12 +134,7 @@ const RegisterPage: React.FC = React.memo(() => {
                                     />
 
                                     <div className="flex justify-center pt-2">
-                                        <ReCAPTCHA
-                                            ref={recaptchaRef}
-                                            sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'}
-                                            onChange={(token) => setCaptchaToken(token)}
-                                            onExpired={() => setCaptchaToken(null)}
-                                        />
+
                                     </div>
                                 </div>
 
@@ -157,7 +144,7 @@ const RegisterPage: React.FC = React.memo(() => {
                                         color="primary"
                                         size="lg"
                                         className="w-full"
-                                        isDisabled={!emailForm.formState.isValid || !captchaToken}
+                                        isDisabled={!emailForm.formState.isValid}
                                     >
                                         Continue
                                     </Button>
