@@ -1,11 +1,286 @@
-import React from 'react';
+'use client';
 
-const Register = () => {
+import React, { useState, useRef } from 'react';
+import { Input, Button } from '@heroui/react';
+import { motion, AnimatePresence } from 'framer-motion';
+import ReCAPTCHA from 'react-google-recaptcha';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+
+// Validation schemas
+const emailSchema = z.object({
+    email: z.string().email('Please enter a valid email address'),
+});
+
+const passwordSchema = z.object({
+    password: z
+        .string()
+        .min(8, 'Password must be at least 8 characters')
+        .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+        .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
+        .regex(/[0-9]/, 'Password must contain at least one number'),
+    confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+});
+
+type EmailFormData = z.infer<typeof emailSchema>;
+type PasswordFormData = z.infer<typeof passwordSchema>;
+
+const RegisterPage: React.FC = React.memo(() => {
+    const [currentPage, setCurrentPage] = useState<1 | 2 | 3>(1);
+    const [direction, setDirection] = useState<'forward' | 'backward'>('forward');
+    const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+    const [formData, setFormData] = useState({
+        email: '',
+        password: '',
+    });
+
+    const recaptchaRef = useRef<ReCAPTCHA>(null);
+
+    // Email form
+    const emailForm = useForm<EmailFormData>({
+        resolver: zodResolver(emailSchema),
+        mode: 'onChange',
+    });
+
+    // Password form
+    const passwordForm = useForm<PasswordFormData>({
+        resolver: zodResolver(passwordSchema),
+        mode: 'onChange',
+    });
+
+    const handleEmailSubmit = (data: EmailFormData) => {
+        if (!captchaToken) {
+            alert('Please complete the captcha');
+            return;
+        }
+        setFormData(prev => ({ ...prev, email: data.email }));
+        setDirection('forward');
+        setCurrentPage(2);
+    };
+
+    const handlePasswordSubmit = async (data: PasswordFormData) => {
+        setFormData(prev => ({ ...prev, password: data.password }));
+
+        // API call placeholder
+        try {
+            // const response = await fetch('/api/register', {
+            //     method: 'POST',
+            //     headers: { 'Content-Type': 'application/json' },
+            //     body: JSON.stringify({
+            //         email: formData.email,
+            //         password: data.password,
+            //         captchaToken,
+            //     }),
+            // });
+
+            setDirection('forward');
+            setCurrentPage(3);
+        } catch (error) {
+            console.error('Registration error:', error);
+        }
+    };
+
+    const goToPage = (page: 1 | 2 | 3) => {
+        setDirection(page > currentPage ? 'forward' : 'backward');
+        setCurrentPage(page);
+    };
+
+    const variants = {
+        enter: (direction: 'forward' | 'backward') => ({
+            x: direction === 'forward' ? '100%' : '-100%',
+            opacity: 0,
+        }),
+        center: {
+            x: 0,
+            opacity: 1,
+        },
+        exit: (direction: 'forward' | 'backward') => ({
+            x: direction === 'forward' ? '-100%' : '100%',
+            opacity: 0,
+        }),
+    };
+
     return (
-        <div>
+        <div className="w-full h-full min-h-[500px] flex flex-col">
+            <div className="mb-6">
+                <h1 className="text-2xl font-bold text-gray-800">Create Account</h1>
+                <p className="text-sm text-gray-600 mt-1">Step {currentPage} of 3</p>
+            </div>
 
+            <div className="flex-1 relative overflow-hidden">
+                <AnimatePresence mode="wait" custom={direction} initial={false}>
+                    {currentPage === 1 && (
+                        <motion.div
+                            key="page1"
+                            custom={direction}
+                            variants={variants}
+                            initial="enter"
+                            animate="center"
+                            exit="exit"
+                            transition={{ duration: 0.3, ease: 'easeInOut' }}
+                            className="absolute inset-0 flex flex-col"
+                        >
+                            <form
+                                onSubmit={emailForm.handleSubmit(handleEmailSubmit)}
+                                className="flex flex-col h-full"
+                            >
+                                <div className="flex-1 space-y-4">
+                                    <Input
+                                        {...emailForm.register('email')}
+                                        type="email"
+                                        label="Email Address"
+                                        placeholder="Enter your email"
+                                        variant="bordered"
+                                        isInvalid={!!emailForm.formState.errors.email}
+                                        errorMessage={emailForm.formState.errors.email?.message}
+                                        autoComplete="email"
+                                        size="lg"
+                                    />
+
+                                    <div className="flex justify-center pt-2">
+                                        <ReCAPTCHA
+                                            ref={recaptchaRef}
+                                            sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'}
+                                            onChange={(token) => setCaptchaToken(token)}
+                                            onExpired={() => setCaptchaToken(null)}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="pt-6">
+                                    <Button
+                                        type="submit"
+                                        color="primary"
+                                        size="lg"
+                                        className="w-full"
+                                        isDisabled={!emailForm.formState.isValid || !captchaToken}
+                                    >
+                                        Continue
+                                    </Button>
+                                </div>
+                            </form>
+                        </motion.div>
+                    )}
+
+                    {currentPage === 2 && (
+                        <motion.div
+                            key="page2"
+                            custom={direction}
+                            variants={variants}
+                            initial="enter"
+                            animate="center"
+                            exit="exit"
+                            transition={{ duration: 0.3, ease: 'easeInOut' }}
+                            className="absolute inset-0 flex flex-col"
+                        >
+                            <form
+                                onSubmit={passwordForm.handleSubmit(handlePasswordSubmit)}
+                                className="flex flex-col h-full"
+                            >
+                                <div className="flex-1 space-y-4">
+                                    <Input
+                                        {...passwordForm.register('password')}
+                                        type="password"
+                                        label="Password"
+                                        placeholder="Enter your password"
+                                        variant="bordered"
+                                        isInvalid={!!passwordForm.formState.errors.password}
+                                        errorMessage={passwordForm.formState.errors.password?.message}
+                                        autoComplete="new-password"
+                                        size="lg"
+                                    />
+
+                                    <Input
+                                        {...passwordForm.register('confirmPassword')}
+                                        type="password"
+                                        label="Confirm Password"
+                                        placeholder="Re-enter your password"
+                                        variant="bordered"
+                                        isInvalid={!!passwordForm.formState.errors.confirmPassword}
+                                        errorMessage={passwordForm.formState.errors.confirmPassword?.message}
+                                        autoComplete="new-password"
+                                        size="lg"
+                                    />
+                                </div>
+
+                                <div className="pt-6 space-y-3">
+                                    <Button
+                                        type="submit"
+                                        color="primary"
+                                        size="lg"
+                                        className="w-full"
+                                        isDisabled={!passwordForm.formState.isValid}
+                                    >
+                                        Register
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        variant="flat"
+                                        size="lg"
+                                        className="w-full"
+                                        onPress={() => goToPage(1)}
+                                    >
+                                        Back
+                                    </Button>
+                                </div>
+                            </form>
+                        </motion.div>
+                    )}
+
+                    {currentPage === 3 && (
+                        <motion.div
+                            key="page3"
+                            custom={direction}
+                            variants={variants}
+                            initial="enter"
+                            animate="center"
+                            exit="exit"
+                            transition={{ duration: 0.3, ease: 'easeInOut' }}
+                            className="absolute inset-0 flex flex-col"
+                        >
+                            <div className="flex-1 flex items-center justify-center">
+                                <div className="text-center">
+                                    <h2 className="text-xl font-semibold text-gray-800 mb-2">
+                                        Verify Your Email
+                                    </h2>
+                                    <p className="text-gray-600 text-sm">
+                                        OTP verification will be implemented here
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="pt-6 space-y-3">
+                                <Button
+                                    type="button"
+                                    color="primary"
+                                    size="lg"
+                                    className="w-full"
+                                    onPress={() => goToPage(1)}
+                                >
+                                    Go to First Page
+                                </Button>
+                                <Button
+                                    type="button"
+                                    variant="flat"
+                                    size="lg"
+                                    className="w-full"
+                                    onPress={() => goToPage(2)}
+                                >
+                                    Go to Second Page
+                                </Button>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
         </div>
     );
-};
+});
 
-export default Register;
+RegisterPage.displayName = 'RegisterPage';
+
+export default RegisterPage;
