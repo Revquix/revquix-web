@@ -1,4 +1,6 @@
 export const PATH_CONSTANTS = {
     LOGIN: '/auth/login',
-    REGISTER: '/auth/register'
+    REGISTER: '/auth/register',
+    TERMS_OF_SERVICE: '/revquix/terms-of-service',
+    PRIVACY_POLICY: '/revquix/privacy-policy'
 } as const;
