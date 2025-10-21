@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useCallback, useMemo, useState} from 'react';
 import {AnimatePresence, motion} from "framer-motion";
 import {Button, Input, InputOtp} from "@heroui/react";
 import {useForm} from "react-hook-form";
@@ -9,11 +9,11 @@ import {PATH_CONSTANTS} from "@/src/core/constants/path-constants";
 import {useLink} from "@/src/core/hooks/useLink";
 import OauthButtons from "@/src/core/components/buttons/oauth-buttons";
 import TextDivider from "@/src/core/components/text-divider";
-import {ChevronLeftIcon} from "@heroui/shared-icons";
+import {ChevronLeftIcon, EditIcon} from "@heroui/shared-icons";
 import {Tooltip} from "@heroui/tooltip";
 import Lottie from "lottie-react";
 import otpShieldLottie from '@/public/lottie/otp_shield.json';
-import { maskEmail } from '@/src/core/utils/email-mask';
+import {maskEmail} from '@/src/core/utils/email-mask';
 
 const emailSchema = z.object({
     email: z.string().email('Please enter a valid email address'),
@@ -100,6 +100,28 @@ const RegisterForm = () => {
         }),
     };
 
+    const backButton = useMemo(()=> {
+        return (
+            <Tooltip
+                content={"Back"}
+                placement={"right"}
+                showArrow
+            >
+                <Button
+                    variant={"bordered"}
+                    isIconOnly
+                    radius={"full"}
+                    onPress={() => handleBackClick()}
+                >
+                    <ChevronLeftIcon
+                        fontSize={20}
+                        className={"text-muted-foreground"}
+                    />
+                </Button>
+            </Tooltip>
+        );
+    }, [currentPage])
+
     return (
         <div className="relative overflow-hidden">
             <AnimatePresence mode="wait" custom={direction} initial={false}>
@@ -128,9 +150,9 @@ const RegisterForm = () => {
                                 </span>
                             </div>
 
-                            <OauthButtons />
+                            <OauthButtons/>
 
-                            <TextDivider text={"or"} />
+                            <TextDivider text={"or"}/>
 
                             <div className="mt-4 mb-6">
                                 <Input
@@ -189,23 +211,7 @@ const RegisterForm = () => {
                             className="flex flex-col space-y-6"
                         >
                             <div>
-                                <Tooltip
-                                    content={"Back"}
-                                    placement={"right"}
-                                    showArrow
-                                >
-                                    <Button
-                                        variant={"bordered"}
-                                        isIconOnly
-                                        radius={"full"}
-                                        onPress={()=> handleBackClick()}
-                                    >
-                                        <ChevronLeftIcon
-                                            fontSize={20}
-                                            className={"text-muted-foreground"}
-                                        />
-                                    </Button>
-                                </Tooltip>
+                                {backButton}
                             </div>
                             <div className="space-y-4">
                                 <Input
@@ -235,8 +241,10 @@ const RegisterForm = () => {
 
                             <div className="space-y-3">
 
-                                <small className={"text-muted-foreground text-xs select-none inline-block text-justify"}>
-                                    By signing up, you confirm that you have read, understood, and agree to adhere to Sana&nbsp;
+                                <small
+                                    className={"text-muted-foreground text-xs select-none inline-block text-justify"}>
+                                    By signing up, you confirm that you have read, understood, and agree to adhere to
+                                    Sana&nbsp;
                                     <Link
                                         href={PATH_CONSTANTS.TERMS_OF_SERVICE}
                                         className={"text-blue-700 underline"}
@@ -244,7 +252,8 @@ const RegisterForm = () => {
                                     >
                                         Terms of Service
                                         {isNavigating(PATH_CONSTANTS.TERMS_OF_SERVICE) && (
-                                            <span className="ml-1 animate-spin inline-block w-3 h-3 border-2 border-blue-700 border-t-transparent rounded-full align-middle" />
+                                            <span
+                                                className="ml-1 animate-spin inline-block w-3 h-3 border-2 border-blue-700 border-t-transparent rounded-full align-middle"/>
                                         )}
                                     </Link>
                                     &nbsp;and&nbsp;
@@ -255,7 +264,8 @@ const RegisterForm = () => {
                                     >
                                         Privacy Policy
                                         {isNavigating(PATH_CONSTANTS.PRIVACY_POLICY) && (
-                                            <span className="ml-1 animate-spin inline-block w-3 h-3 border-2 border-blue-700 border-t-transparent rounded-full align-middle" />
+                                            <span
+                                                className="ml-1 animate-spin inline-block w-3 h-3 border-2 border-blue-700 border-t-transparent rounded-full align-middle"/>
                                         )}
                                     </Link>
                                     , ensuring a secure and seamless experience
@@ -290,7 +300,7 @@ const RegisterForm = () => {
                             <Lottie
                                 animationData={otpShieldLottie}
                                 loop={false}
-                                className={"w-[30%]"}
+                                className={"w-[25%]"}
                             />
                         </div>
 
@@ -299,14 +309,56 @@ const RegisterForm = () => {
                                 Verify your Email
                             </h2>
                             <span className={"text-muted-foreground text-sm w-[80%] text-center"}>
-                                We sent OTP (One-Time Password) to your email address <br />
-                                <span className="font-mono text-primary font-semibold">{maskEmail(formData.email)}</span>
+                                We sent OTP (One-Time Password) to your email address
                             </span>
 
-                            <div>
-
+                            <div className={"flex gap-2 items-center justify-center"}>
+                                <span className="block max-w-[90%] truncate overflow-hidden text-ellipsis whitespace-nowrap text-sm text-muted-foreground font-bold">
+                                    {maskEmail(formData.email)}
+                                </span>
+                                <Tooltip
+                                    content={"Edit Email"}
+                                    placement={"top"}
+                                    showArrow
+                                    color={"primary"}
+                                >
+                                    <Button
+                                        isIconOnly
+                                        radius={"full"}
+                                        size={"sm"}
+                                        variant={"flat"}
+                                        color="primary"
+                                        onPress={()=> goToPage(1)}
+                                    >
+                                        <EditIcon/>
+                                    </Button>
+                                </Tooltip>
                             </div>
-                            <InputOtp length={4} />
+                            <InputOtp
+                                length={4}
+                                variant={"bordered"}
+                                color={"primary"}
+                                radius={"lg"}
+
+                            />
+
+                            <div className={"flex items-center justify-center"}>
+                                <Button
+                                    variant={"light"}
+                                    size={"sm"}
+                                    color={"primary"}
+                                >
+                                    Resend OTP
+                                </Button>
+                            </div>
+
+                            <Button
+                                fullWidth
+                                color={"primary"}
+                                className={"mt-2"}
+                            >
+                                Confirm OTP
+                            </Button>
                         </div>
                     </motion.div>
                 )}

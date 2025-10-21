@@ -2,24 +2,17 @@
 // Example: rohitparih@gmail.com => ro*****ih@g**l.com
 
 export function maskEmail(email: string): string {
-    const [local, domainFull] = email.split('@');
-    if (!local || !domainFull) return email;
-    const domainParts = domainFull.split('.');
-    const domain = domainParts[0];
-    const tld = domainParts.slice(1).join('.');
+    const [local, domain] = email.split('@');
+    if (!local || !domain) return email;
 
-    // Mask local part
-    let maskedLocal = local;
-    if (local.length > 4) {
-        maskedLocal = local.slice(0, 2) + '*'.repeat(local.length - 4) + local.slice(-2);
+    let maskedLocal: string;
+
+    if (local.length <= 1) {
+        maskedLocal = '****';
+    } else {
+        maskedLocal = `${local[0]}****${local.slice(-1)}`;
     }
 
-    // Mask domain part
-    let maskedDomain = domain;
-    if (domain.length > 2) {
-        maskedDomain = domain[0] + '*'.repeat(domain.length - 2) + domain.slice(-1);
-    }
-
-    return `${maskedLocal}@${maskedDomain}${tld ? '.' + tld : ''}`;
+    return `${maskedLocal}@${domain}`;
 }
 
