@@ -13,7 +13,7 @@ const AuthLayout: React.FC<{ children: React.ReactNode }> = ({children}) => {
             className="flex min-h-screen bg-primary items-center justify-center bg-cover bg-center light"
             style={{backgroundImage: "url('/svg/auth-bg.svg')"}}
         >
-            <Card className={"w-full max-w-[min(400px,95vw)] bg-white p-4 rounded-lg shadow-lg flex flex-col gap-7"}>
+            <Card className={"w-full max-w-[min(400px,95vw)] bg-white p-4 rounded-lg shadow-lg flex flex-col gap-4"}>
                 <div className="flex flex-col gap-4">
                     <div className={"flex gap-1 items-center"}>
                         <Logo size={30}/>
@@ -21,16 +21,6 @@ const AuthLayout: React.FC<{ children: React.ReactNode }> = ({children}) => {
                     </div>
 
                     <Divider/>
-
-                    <div className={"flex flex-col gap-2"}>
-                        <h1 className={"text-xl font-extrabold text-primary"}>
-                            Register Account
-                        </h1>
-
-                        <span className={"text-xs leading-4 inline-block"}>
-                                Ready to share your ideas? Register now to write blogs, join forums, and connect with others!
-                            </span>
-                    </div>
                 </div>
 
                 {children}
