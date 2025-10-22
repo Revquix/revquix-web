@@ -25,6 +25,7 @@ import {AuthController} from "@/src/core/controller/auth-controller";
 import apiErrorWrapper from "@/src/core/utils/api-error-wrapper";
 import {addToast} from "@heroui/toast";
 import {RegisterRequest} from "@/src/core/payload/request/register-request";
+import {RegisterOtpRequest} from "@/src/core/payload/request/register-otp-request";
 
 const emailSchema = z.object({
     email: z.string().email('Please enter a valid email address'),
@@ -56,6 +57,7 @@ const Register = () => {
         password: '',
     });
     const [registrationResponse, setRegistrationResponse] = useState<ModuleResponse | null>(null);
+    const [otpValue, setOtpValue] = useState<string>('');
 
     // Email form
     const emailForm = useForm<EmailFormData>({
@@ -68,6 +70,10 @@ const Register = () => {
         resolver: zodResolver(passwordSchema),
         mode: 'onChange',
     });
+
+    const isValidOtp = useMemo(() => {
+        return otpValue.length === 4 && /^\d{4}$/.test(otpValue);
+    }, [otpValue]);
 
     // Registration status check mutation
     const registrationStatusMutation = useMutation<RegistrationStatusResponse, AxiosError, string>({
@@ -149,6 +155,41 @@ const Register = () => {
         },
     });
 
+    const registrationOtpMutation = useMutation<ModuleResponse, AxiosError, RegisterOtpRequest>({
+        mutationFn: (registerOtpRequest: RegisterOtpRequest) => AuthController.registerOtp(registerOtpRequest),
+        onSuccess: (data) => {
+            addToast({
+                classNames: {
+                    base: "dark"
+                },
+                title: "OTP Verified",
+                description: data.message,
+                color: "success"
+            });
+        },
+        onError: (error: AxiosError) => {
+            apiErrorWrapper(
+                error,
+                exceptionResponse => addToast({
+                    classNames: {
+                        base: "dark"
+                    },
+                    title: "Error",
+                    description: exceptionResponse.message,
+                    color: "danger"
+                }),
+                error => addToast({
+                    classNames: {
+                        base: "dark"
+                    },
+                    title: "Server Error",
+                    description: "An unexpected error occurred. Please try again later.",
+                    color: "danger"
+                })
+            )
+        },
+    });
+
     const handleEmailSubmit = (data: EmailFormData) => {
         setFormData(prev => ({...prev, email: data.email}));
         registrationStatusMutation.mutate(data.email);
@@ -188,6 +229,26 @@ const Register = () => {
             opacity: 0,
         }),
     };
+
+    const handleConfirmOtp = () => {
+        if (registrationResponse) {
+            const registerOtpRequest: RegisterOtpRequest = {
+                otp: otpValue,
+                userId: registrationResponse.userId || ''
+            };
+            registrationOtpMutation.mutate(registerOtpRequest);
+        } else {
+            addToast({
+                classNames: {
+                    base: "dark"
+                },
+                title: "Error",
+                description: "Something went wrong. Please try again later.",
+                color: "danger"
+            })
+            window.location.reload();
+        }
+    }
 
     const backButton = useMemo(()=> {
         return (
@@ -428,9 +489,9 @@ const Register = () => {
                             <InputOtp
                                 length={4}
                                 variant={"bordered"}
-                                color={"primary"}
                                 radius={"lg"}
-
+                                value={otpValue}
+                                onValueChange={setOtpValue}
                             />
 
                             <div className={"flex items-center justify-center"}>
@@ -447,6 +508,9 @@ const Register = () => {
                                 fullWidth
                                 color={"primary"}
                                 className={"mt-2"}
+                                isDisabled={!isValidOtp}
+                                isLoading={registrationOtpMutation.isPending}
+                                onPress={()=> handleConfirmOtp()}
                             >
                                 Confirm OTP
                             </Button>
