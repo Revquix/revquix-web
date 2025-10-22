@@ -19,10 +19,12 @@ import {maskEmail} from '@/src/core/utils/email-mask';
 import {useRegistrationStatus} from "@/src/core/hooks/useRegistrationStatus";
 import {useMutation} from "@tanstack/react-query";
 import {RegistrationStatusResponse} from "@/src/core/payload/response/registration-status-response";
+import {ModuleResponse} from "@/src/core/payload/response/module-response";
 import {AxiosError} from "axios";
 import {AuthController} from "@/src/core/controller/auth-controller";
 import apiErrorWrapper from "@/src/core/utils/api-error-wrapper";
 import {addToast} from "@heroui/toast";
+import {RegisterRequest} from "@/src/core/payload/request/register-request";
 
 const emailSchema = z.object({
     email: z.string().email('Please enter a valid email address'),
@@ -53,6 +55,7 @@ const Register = () => {
         email: '',
         password: '',
     });
+    const [registrationResponse, setRegistrationResponse] = useState<ModuleResponse | null>(null);
 
     // Email form
     const emailForm = useForm<EmailFormData>({
@@ -66,9 +69,21 @@ const Register = () => {
         mode: 'onChange',
     });
 
+    // Registration status check mutation
     const registrationStatusMutation = useMutation<RegistrationStatusResponse, AxiosError, string>({
         mutationFn: (email: string) => AuthController.registrationStatus(email),
         onSuccess: (data) => {
+            if (data.isRegistered) {
+                addToast({
+                    classNames: {
+                        base: "dark"
+                    },
+                    title: "Account Already Exists",
+                    description: "This email is already registered. Please try logging in instead.",
+                    color: "warning"
+                });
+                return;
+            }
             setDirection('forward');
             setCurrentPage(2);
         },
@@ -95,6 +110,45 @@ const Register = () => {
         },
     });
 
+    // Registration mutation
+    const registrationMutation = useMutation<ModuleResponse, AxiosError, RegisterRequest>({
+        mutationFn: (data: RegisterRequest) => AuthController.register(data),
+        onSuccess: (data) => {
+            setRegistrationResponse(data);
+            addToast({
+                classNames: {
+                    base: "dark"
+                },
+                title: "Registration Successful",
+                description: "Please check your email for verification code.",
+                color: "success"
+            });
+            setDirection('forward');
+            setCurrentPage(3);
+        },
+        onError: (error: AxiosError) => {
+            apiErrorWrapper(
+                error,
+                exceptionResponse => addToast({
+                    classNames: {
+                        base: "dark"
+                    },
+                    title: "Registration Failed",
+                    description: exceptionResponse.message,
+                    color: "danger"
+                }),
+                error => addToast({
+                    classNames: {
+                        base: "dark"
+                    },
+                    title: "Server Error",
+                    description: "An unexpected error occurred. Please try again later.",
+                    color: "danger"
+                })
+            )
+        },
+    });
+
     const handleEmailSubmit = (data: EmailFormData) => {
         setFormData(prev => ({...prev, email: data.email}));
         registrationStatusMutation.mutate(data.email);
@@ -106,15 +160,13 @@ const Register = () => {
     }
 
     const handlePasswordSubmit = async (data: PasswordFormData) => {
-        setFormData(prev => ({...prev, password: data.password}));
+        const registerData: RegisterRequest = {
+            email: formData.email,
+            password: data.password
+        };
 
-        // API call will be implemented here
-        try {
-            setDirection('forward');
-            setCurrentPage(3);
-        } catch (error) {
-            console.error('Registration error:', error);
-        }
+        setFormData(prev => ({...prev, password: data.password}));
+        registrationMutation.mutate(registerData);
     };
 
     const goToPage = (page: 1 | 2 | 3) => {
@@ -210,7 +262,8 @@ const Register = () => {
                                 color="primary"
                                 size="lg"
                                 className="w-full"
-                                isDisabled={!emailForm.formState.isValid}
+                                isDisabled={!emailForm.formState.isValid || registrationStatusMutation.isPending}
+                                isLoading={registrationStatusMutation.isPending}
                             >
                                 Continue
                             </Button>
@@ -313,7 +366,8 @@ const Register = () => {
                                     color="primary"
                                     size="lg"
                                     className="w-full"
-                                    isDisabled={!passwordForm.formState.isValid}
+                                    isDisabled={!passwordForm.formState.isValid || registrationMutation.isPending}
+                                    isLoading={registrationMutation.isPending}
                                 >
                                     Register
                                 </Button>
