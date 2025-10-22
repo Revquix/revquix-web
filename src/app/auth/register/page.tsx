@@ -16,6 +16,13 @@ import {Tooltip} from "@heroui/tooltip";
 import Lottie from "lottie-react";
 import otpShieldLottie from '@/public/lottie/otp_shield.json';
 import {maskEmail} from '@/src/core/utils/email-mask';
+import {useRegistrationStatus} from "@/src/core/hooks/useRegistrationStatus";
+import {useMutation} from "@tanstack/react-query";
+import {RegistrationStatusResponse} from "@/src/core/payload/response/registration-status-response";
+import {AxiosError} from "axios";
+import {AuthController} from "@/src/core/controller/auth-controller";
+import apiErrorWrapper from "@/src/core/utils/api-error-wrapper";
+import {addToast} from "@heroui/toast";
 
 const emailSchema = z.object({
     email: z.string().email('Please enter a valid email address'),
@@ -59,10 +66,38 @@ const Register = () => {
         mode: 'onChange',
     });
 
+    const registrationStatusMutation = useMutation<RegistrationStatusResponse, AxiosError, string>({
+        mutationFn: (email: string) => AuthController.registrationStatus(email),
+        onSuccess: (data) => {
+            setDirection('forward');
+            setCurrentPage(2);
+        },
+        onError: (error: AxiosError) => {
+            apiErrorWrapper(
+                error,
+                exceptionResponse => addToast({
+                    classNames: {
+                        base: "dark"
+                    },
+                    title: "Error",
+                    description: exceptionResponse.message,
+                    color: "danger"
+                }),
+                error => addToast({
+                    classNames: {
+                        base: "dark"
+                    },
+                    title: "Server Error",
+                    description: "An unexpected error occurred. Please try again later.",
+                    color: "danger"
+                })
+            )
+        },
+    });
+
     const handleEmailSubmit = (data: EmailFormData) => {
         setFormData(prev => ({...prev, email: data.email}));
-        setDirection('forward');
-        setCurrentPage(2);
+        registrationStatusMutation.mutate(data.email);
     };
 
     const handleBackClick = () => {

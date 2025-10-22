@@ -26,7 +26,7 @@ export class AuthController {
         try {
             const response: AxiosResponse<RegistrationStatusResponse> = await baseAxios.get(API_CONSTANTS.REGISTRATION_STATUS, {
                 params: {
-                    'email': qs.stringify(email),
+                    'email': email,
                 }
             })
             return response.data;
