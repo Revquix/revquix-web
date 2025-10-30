@@ -90,4 +90,12 @@ export class AuthController {
             throw error;
         }
     }
+
+    static async logout(): Promise<void> {
+        try {
+            await baseAxios.delete(API_CONSTANTS.LOGOUT);
+        } catch (error) {
+            throw error;
+        }
+    }
 }

@@ -5,4 +5,5 @@ export const API_CONSTANTS = {
     TOKEN: '/v1/auth/token',
     VERIFY_MFA: '/v1/auth/verify-mfa',
     REFRESH_TOKEN: '/v1/auth/refresh-token',
+    LOGOUT: '/v1/auth/logout',
 } as const;

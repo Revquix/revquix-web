@@ -1,15 +1,23 @@
-import { Link } from "@heroui/link";
-import { Snippet } from "@heroui/snippet";
-import { Code } from "@heroui/code";
-import { button as buttonStyles } from "@heroui/theme";
-import { Button } from "@heroui/button";
+'use client';
+
+import {Button} from "@heroui/button";
+import {useLogout} from "@/src/core/hooks/useLogout";
 
 export default function Home() {
-  return (
-    <div>
-      Rohit Parihar
 
-      <Button>Rohit</Button>
-    </div>
-  );
+    const {logout, isLoading} = useLogout();
+
+    return (
+        <div>
+            Rohit Parihar
+
+            <Button
+                onPress={logout}
+                disabled={isLoading}
+                isLoading={isLoading}
+            >
+                Logout
+            </Button>
+        </div>
+    );
 }
