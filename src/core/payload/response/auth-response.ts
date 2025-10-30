@@ -6,3 +6,8 @@ export type AuthResponse = {
     tokenType: string;
     expiresOn: number;
 }
+
+export type RefreshTokenResponse = {
+    accessToken?: string;
+    userId: string;
+}

@@ -13,6 +13,7 @@ import {ToastProvider} from "@heroui/toast";
 import {Provider as ReduxProvider} from "react-redux";
 import store from "@/src/core/state/store";
 import { GlobalLoader } from "@/src/core/components/global-loader";
+import RefreshTokenProvider from "@/src/core/providers/refresh-token-provider";
 
 export interface ProvidersProps {
     children: React.ReactNode;
@@ -42,8 +43,10 @@ export function Providers({children, themeProps}: Readonly<ProvidersProps>) {
                         timeout: 4000,
                     }} />
                     <NextThemesProvider {...themeProps}>
-                        <GlobalLoader />
-                        {children}
+                        <RefreshTokenProvider>
+                            <GlobalLoader />
+                            {children}
+                        </RefreshTokenProvider>
                     </NextThemesProvider>
                 </HeroUIProvider>
             </QueryClientProvider>

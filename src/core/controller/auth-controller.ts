@@ -7,7 +7,7 @@ import {AxiosResponse} from "axios";
 import {RegistrationStatusResponse} from "@/src/core/payload/response/registration-status-response";
 import {RegisterOtpRequest} from "@/src/core/payload/request/register-otp-request";
 import {TokenRequest} from "@/src/core/payload/request/token-request";
-import {AuthResponse} from "@/src/core/payload/response/auth-response";
+import {AuthResponse, RefreshTokenResponse} from "@/src/core/payload/response/auth-response";
 import {VerifyMfaRequest} from "@/src/core/payload/request/verify-mfa-request";
 
 export class AuthController {
@@ -76,6 +76,15 @@ export class AuthController {
                 API_CONSTANTS.VERIFY_MFA,
                 data
             );
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    static async refreshToken(): Promise<RefreshTokenResponse> {
+        try {
+            const response: AxiosResponse<RefreshTokenResponse> = await baseAxios.get(API_CONSTANTS.REFRESH_TOKEN);
             return response.data;
         } catch (error) {
             throw error;
