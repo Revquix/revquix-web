@@ -215,7 +215,7 @@ const Login = () => {
                             onSubmit={loginForm.handleSubmit(handleLoginSubmit)}
                             className="flex flex-col space-y-2"
                         >
-                            <Button onPress={()=> showLoader({blurOpacity: 0, isSpinner: false})}>
+                            <Button onPress={()=> showLoader({blurOpacity: 0.5, isSpinner: true, message: "Loading..."})}>
                                 Show Loading
                             </Button>
                             <div className={"flex flex-col gap-1 mb-7"}>
