@@ -57,9 +57,7 @@ const Login = () => {
     const [otpValue, setOtpValue] = useState<string>('');
     const [authResponse, setAuthResponse] = useState<AuthResponse | null>(null);
     const router = useRouter();
-    const {showLoader, hideLoader}= useLoaderActions();
 
-    // Login form
     const loginForm = useForm<TokenRequest>({
         resolver: zodResolver(loginSchema),
         mode: 'onChange',
@@ -215,9 +213,6 @@ const Login = () => {
                             onSubmit={loginForm.handleSubmit(handleLoginSubmit)}
                             className="flex flex-col space-y-2"
                         >
-                            <Button onPress={()=> showLoader({blurOpacity: 0.5, isSpinner: true, message: "Loading..."})}>
-                                Show Loading
-                            </Button>
                             <div className={"flex flex-col gap-1 mb-7"}>
                                 <h1 className={"text-xl font-extrabold text-primary"}>
                                     Revquix Sign In
