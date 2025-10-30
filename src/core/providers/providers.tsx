@@ -10,6 +10,9 @@ import {QueryClientProvider} from "@tanstack/react-query";
 import {QueryClient} from "@tanstack/query-core";
 import {ReactQueryDevtools} from "@tanstack/react-query-devtools";
 import {ToastProvider} from "@heroui/toast";
+import {Provider as ReduxProvider} from "react-redux";
+import store from "@/src/core/state/store";
+import { GlobalLoader } from "@/src/core/components/global-loader";
 
 export interface ProvidersProps {
     children: React.ReactNode;
@@ -26,19 +29,24 @@ declare module "@react-types/shared" {
 
 export const queryClient: QueryClient = new QueryClient();
 
-export function Providers({children, themeProps}: ProvidersProps) {
+export function Providers({children, themeProps}: Readonly<ProvidersProps>) {
     const router = useRouter();
 
     return (
-        <QueryClientProvider client={queryClient}>
-            <ReactQueryDevtools />
-            <HeroUIProvider navigate={router.push}>
-                <ToastProvider placement={"top-right"} toastProps={{
-                    radius: "lg",
-                    timeout: 4000,
-                }} />
-                <NextThemesProvider {...themeProps}>{children}</NextThemesProvider>
-            </HeroUIProvider>
-        </QueryClientProvider>
+        <ReduxProvider store={store}>
+            <QueryClientProvider client={queryClient}>
+                <ReactQueryDevtools />
+                <HeroUIProvider navigate={router.push}>
+                    <ToastProvider placement={"top-right"} toastProps={{
+                        radius: "lg",
+                        timeout: 4000,
+                    }} />
+                    <NextThemesProvider {...themeProps}>
+                        <GlobalLoader />
+                        {children}
+                    </NextThemesProvider>
+                </HeroUIProvider>
+            </QueryClientProvider>
+        </ReduxProvider>
     );
 }

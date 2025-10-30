@@ -27,6 +27,9 @@ import Lottie from "lottie-react";
 import otpShieldLottie from "@/public/lottie/otp_shield.json";
 import {maskEmail} from "@/src/core/utils/email-mask";
 import {VerifyMfaRequest} from "@/src/core/payload/request/verify-mfa-request";
+import {loginErrorHandler} from "@/src/features/auth/login-error-handler";
+import {useRouter} from "next/navigation";
+import {useLoaderActions} from "@/src/core/hooks/useLoaderActions";
 
 const loginSchema = z.object({
     entrypoint: z
@@ -53,6 +56,8 @@ const Login = () => {
     const {handleLinkClick, isNavigating} = useLink();
     const [otpValue, setOtpValue] = useState<string>('');
     const [authResponse, setAuthResponse] = useState<AuthResponse | null>(null);
+    const router = useRouter();
+    const {showLoader, hideLoader}= useLoaderActions();
 
     // Login form
     const loginForm = useForm<TokenRequest>({
@@ -117,14 +122,7 @@ const Login = () => {
         onError: (error: AxiosError) => {
             apiErrorWrapper(
                 error,
-                exceptionResponse => addToast({
-                    classNames: {
-                        base: "dark"
-                    },
-                    title: "Login Failed",
-                    description: exceptionResponse.message,
-                    color: "danger"
-                }),
+                exceptionResponse => loginErrorHandler(exceptionResponse, router),
                 error => addToast({
                     classNames: {
                         base: "dark"
@@ -217,6 +215,9 @@ const Login = () => {
                             onSubmit={loginForm.handleSubmit(handleLoginSubmit)}
                             className="flex flex-col space-y-2"
                         >
+                            <Button onPress={()=> showLoader({blurOpacity: 0, isSpinner: false})}>
+                                Show Loading
+                            </Button>
                             <div className={"flex flex-col gap-1 mb-7"}>
                                 <h1 className={"text-xl font-extrabold text-primary"}>
                                     Revquix Sign In

@@ -1,7 +1,5 @@
 import "@/src/styles/globals.css";
 import { Metadata, Viewport } from "next";
-import { Link } from "@heroui/link";
-import clsx from "clsx";
 import { Providers } from "../core/providers/providers";
 import { Nunito } from "next/font/google";
 
@@ -11,6 +9,13 @@ const nunito = Nunito({
   display: 'swap',
   variable: '--font-nunito',
 });
+
+export const metadata: Metadata = {
+  title: "Revquix",
+  icons: {
+    icon: '/favicon.ico',
+  },
+};
 
 export const viewport: Viewport = {
   themeColor: [
