@@ -28,8 +28,10 @@ import otpShieldLottie from "@/public/lottie/otp_shield.json";
 import {maskEmail} from "@/src/core/utils/email-mask";
 import {VerifyMfaRequest} from "@/src/core/payload/request/verify-mfa-request";
 import {loginErrorHandler} from "@/src/features/auth/login-error-handler";
-import {useRouter} from "next/navigation";
+import {useRouter, useSearchParams} from "next/navigation";
 import {useLoaderActions} from "@/src/core/hooks/useLoaderActions";
+import {loginSuccessHandler} from "@/src/features/auth/login-success-handler";
+import {useAppDispatch} from "@/src/core/hooks/redux-hooks";
 
 const loginSchema = z.object({
     entrypoint: z
@@ -57,6 +59,8 @@ const Login = () => {
     const [otpValue, setOtpValue] = useState<string>('');
     const [authResponse, setAuthResponse] = useState<AuthResponse | null>(null);
     const router = useRouter();
+    const dispatch = useAppDispatch();
+    const searchParams = useSearchParams();
 
     const loginForm = useForm<TokenRequest>({
         resolver: zodResolver(loginSchema),
@@ -103,8 +107,12 @@ const Login = () => {
                 description: "You have been logged in successfully.",
                 color: "success"
             });
-            // Redirect to dashboard or home page
-            window.location.href = '/';
+            loginSuccessHandler(
+                data,
+                router,
+                dispatch,
+                searchParams
+            );
         } else {
             setAuthResponse(data);
             setDirection('forward');
@@ -136,7 +144,12 @@ const Login = () => {
     const verifyMfaMutation = useMutation<AuthResponse, AxiosError, VerifyMfaRequest>({
         mutationFn: (data: VerifyMfaRequest) => AuthController.verifyMfa(data),
         onSuccess: (data) => {
-            window.location.href = '/';
+            loginSuccessHandler(
+                data,
+                router,
+                dispatch,
+                searchParams
+            );
         },
         onError: (error: AxiosError) => {
             apiErrorWrapper(

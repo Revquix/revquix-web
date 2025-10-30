@@ -7,9 +7,10 @@ import { clearAuthData } from "@/src/core/state/slice/auth-slice";
 import { addToast } from "@heroui/toast";
 import apiErrorWrapper from "@/src/core/utils/api-error-wrapper";
 import { PATH_CONSTANTS } from "@/src/core/constants/path-constants";
+import {useAppDispatch} from "@/src/core/hooks/redux-hooks";
 
 export const useLogout = () => {
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
     const router = useRouter();
 
     const mutation = useMutation<void, AxiosError, void>({

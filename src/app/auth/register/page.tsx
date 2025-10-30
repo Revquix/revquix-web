@@ -1,6 +1,6 @@
 "use client";
 
-import React, {useCallback, useMemo, useState} from 'react';
+import React, {useMemo, useState} from 'react';
 import {AnimatePresence, motion} from "framer-motion";
 import {Button, Input, InputOtp} from "@heroui/react";
 import {useForm} from "react-hook-form";
@@ -16,7 +16,6 @@ import {Tooltip} from "@heroui/tooltip";
 import Lottie from "lottie-react";
 import otpShieldLottie from '@/public/lottie/otp_shield.json';
 import {maskEmail} from '@/src/core/utils/email-mask';
-import {useRegistrationStatus} from "@/src/core/hooks/useRegistrationStatus";
 import {useMutation} from "@tanstack/react-query";
 import {RegistrationStatusResponse} from "@/src/core/payload/response/registration-status-response";
 import {ModuleResponse} from "@/src/core/payload/response/module-response";

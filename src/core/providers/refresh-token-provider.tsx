@@ -6,6 +6,7 @@ import { AuthController } from '@/src/core/controller/auth-controller';
 import { setAuthData, clearAuthData } from '@/src/core/state/slice/auth-slice';
 import LoaderPage from '@/src/core/components/loader-page';
 import { AppDispatch } from '@/src/core/state/store';
+import {useAppDispatch} from "@/src/core/hooks/redux-hooks";
 
 interface RefreshTokenProviderProps {
     children: React.ReactNode;
@@ -38,7 +39,7 @@ const RefreshTokenProvider: React.FC<RefreshTokenProviderProps> = ({
     retryDelay = 1000
 }) => {
     const [isLoading, setIsLoading] = useState(true);
-    const dispatch = useDispatch<AppDispatch>();
+    const dispatch = useAppDispatch();
     const mountedRef = useRef(true);
 
     const sleep = useCallback((ms: number) => new Promise(resolve => setTimeout(resolve, ms)), []);
