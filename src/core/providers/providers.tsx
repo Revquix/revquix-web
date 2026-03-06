@@ -43,10 +43,10 @@ export function Providers({children, themeProps}: Readonly<ProvidersProps>) {
                         timeout: 4000,
                     }} />
                     <NextThemesProvider {...themeProps}>
-                        <RefreshTokenProvider>
+                        {/*<RefreshTokenProvider>*/}
                             <GlobalLoader />
                             {children}
-                        </RefreshTokenProvider>
+                        {/*</RefreshTokenProvider>*/}
                     </NextThemesProvider>
                 </HeroUIProvider>
             </QueryClientProvider>
